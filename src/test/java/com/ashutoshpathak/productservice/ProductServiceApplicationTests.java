@@ -1,8 +1,10 @@
 package com.ashutoshpathak.productservice;
 
 import com.ashutoshpathak.productservice.dto.ProductRequest;
+import com.ashutoshpathak.productservice.repository.ProductRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +21,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -35,6 +38,9 @@ class ProductServiceApplicationTests {
 	@Autowired
 	ObjectMapper objectMapper;
 
+	@Autowired
+	ProductRepository productRepository;
+
 	@DynamicPropertySource
 	static void setProperties(DynamicPropertyRegistry dynamicPropertyRegistry){
 		dynamicPropertyRegistry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
@@ -49,9 +55,11 @@ class ProductServiceApplicationTests {
 
 
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/product")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(productRequestString))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(productRequestString))
 				.andExpect(status().isCreated());
+
+		assertEquals(1, productRepository.findAll().size());
 
 	}
 
